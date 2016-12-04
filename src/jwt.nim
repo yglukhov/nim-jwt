@@ -70,23 +70,26 @@ proc parsed*(token: JWT): string =
 
 
 # Signs a string with a secret
-proc signString*(toSign: string, secret: var string): string =
+proc signString*(toSign: string, secret: string, algorithm: SignatureAlgorithm = HS256): string =
   var
     signature: array[32, uint8]
     sigsize: cuint
-  discard hmac.HMAC(hmac.EVP_sha256(), addr(secret[0]), 8, toSign.cstring, toSign.len.cint, cast[ptr char](addr signature), addr sigsize)
+  case algorithm
+  of HS256:
+    discard hmac.HMAC(hmac.EVP_sha256(), unsafeAddr(secret[0]), 8, toSign.cstring, toSign.len.cint, cast[ptr char](addr signature), addr sigsize)
+  else:
+    raise newException(UnsupportedAlgorithm, $algorithm & " isn't supported")
   result = join(signature.map((i: uint8) => (toHex(BiggestInt(i), 2))), "")
 
-
 # Verify that the token is not tampered with
-proc verifySignature*(data: string, signature: string, secret: var string): bool =
+proc verifySignature*(data: string, signature: string, secret: string): bool =
   let dataSignature = signString(data, secret)
   result = dataSignature == signature
 
 
-proc sign*(token: var JWT, secret: var string) =
+proc sign*(token: var JWT, secret: string) =
   assert token.signature == nil
-  token.signature = signString(token.parsed, secret)
+  token.signature = signString(token.parsed, secret, token.header.alg)
 
 
 # Verify a token typically an incoming request

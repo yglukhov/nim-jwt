@@ -7,8 +7,9 @@ type
     UnsupportedAlgorithm* = object of CryptoException
 
     SignatureAlgorithm* = enum
-        NONE = "NONE"
-        HS256 = "HS256"
+        NONE
+        HS256
+        RS256 # Not supported yet
 
     JOSEHeader* = object
         alg*: SignatureAlgorithm
