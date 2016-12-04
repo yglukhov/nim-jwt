@@ -17,7 +17,7 @@ This is a implementation of JSON Web Tokens for Nim, it allows for the following
 
 An example to demonstrate use with a userId
 
-```
+```nim
 import jwt, times, json, tables
 
 var secret = "secret"
