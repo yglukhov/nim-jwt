@@ -77,6 +77,10 @@ proc signString*(toSign: string, secret: string, algorithm: SignatureAlgorithm =
   case algorithm
   of HS256:
     discard hmac.HMAC(hmac.EVP_sha256(), unsafeAddr(secret[0]), 8, toSign.cstring, toSign.len.cint, cast[ptr char](addr signature), addr sigsize)
+  of HS384:
+    discard hmac.HMAC(hmac.EVP_sha384(), unsafeAddr(secret[0]), 8, toSign.cstring, toSign.len.cint, cast[ptr char](addr signature), addr sigsize)
+  of HS512:
+    discard hmac.HMAC(hmac.EVP_sha512(), unsafeAddr(secret[0]), 8, toSign.cstring, toSign.len.cint, cast[ptr char](addr signature), addr sigsize)
   else:
     raise newException(UnsupportedAlgorithm, $algorithm & " isn't supported")
   result = join(signature.map((i: uint8) => (toHex(BiggestInt(i), 2))), "")

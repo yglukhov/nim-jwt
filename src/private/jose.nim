@@ -9,6 +9,8 @@ type
     SignatureAlgorithm* = enum
         NONE
         HS256
+        HS384
+        HS512
         RS256 # Not supported yet
 
     JOSEHeader* = object
