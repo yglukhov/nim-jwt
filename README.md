@@ -83,7 +83,7 @@ proc request(url: string, body: string): string =
   result = client.postContent(url, body)
   client.close()
 
-let resp = request("https://www.googleapis.com/oauth2/v4/token", postdata).parseJson()["access_token"]
+let resp = request("https://www.googleapis.com/oauth2/v4/token", postdata).parseJson()
 echo "Access token is: ", resp["access_token"].str
 ```
 
