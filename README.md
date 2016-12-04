@@ -50,3 +50,43 @@ proc decode*(token: string): string =
   result = $jwt.claims["userId"].node.str
 
 ```
+
+Getting google api oauth2 token:
+```nim
+import jwt, json, times, httpclient, cgi
+
+const email = "username@api-12345-12345.iam.gserviceaccount.com" # Acquired from google api console
+const scope = "https://www.googleapis.com/auth/androidpublisher" # Define needed scope
+const privateKey = """
+-----BEGIN PRIVATE KEY-----
+The key should be Acquired from google api console
+-----END PRIVATE KEY-----
+"""
+
+var tok = JWT(
+  header: JOSEHeader(alg: RS256, typ: "JWT"),
+  claims: toClaims(%*{
+  "iss": email,
+  "scope": scope,
+  "aud": "https://www.googleapis.com/oauth2/v4/token",
+  "exp": int(epochTime() + 60 * 60),
+  "iat": int(epochTime())
+}))
+
+tok.sign(privateKey)
+
+let postdata = "grant_type=" & encodeUrl("urn:ietf:params:oauth:grant-type:jwt-bearer") & "&assertion=" & $tok
+
+proc request(url: string, body: string): string =
+  var client = newHttpClient()
+  client.headers = newHttpHeaders({ "Content-Length": $body.len, "Content-Type": "application/x-www-form-urlencoded" })
+  result = client.postContent(url, body)
+  client.close()
+
+let resp = request("https://www.googleapis.com/oauth2/v4/token", postdata).parseJson()["access_token"]
+echo "Access token is: ", resp["access_token"].str
+```
+
+## Troubleshooting
+This library requires a recent version of libcrypto. Specifically the one that
+has `EVP_DigestSign*` functions.
