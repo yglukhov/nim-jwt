@@ -11,7 +11,9 @@ type
         HS256
         HS384
         HS512
-        RS256 # Not supported yet
+        RS256
+        RS384
+        RS512
 
     JOSEHeader* = object
         alg*: SignatureAlgorithm

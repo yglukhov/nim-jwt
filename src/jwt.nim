@@ -1,6 +1,6 @@
 import future, json, strutils, tables, times, sequtils
 
-from private/hmac import nil
+from private/crypto import nil
 
 import private/claims, private/jose, private/utils
 
@@ -74,13 +74,29 @@ proc signString*(toSign: string, secret: string, algorithm: SignatureAlgorithm =
   var
     signature: array[32, uint8]
     sigsize: cuint
+
+  template hsSign(meth: typed) =
+    discard crypto.HMAC(meth, unsafeAddr(secret[0]), 8, toSign.cstring, toSign.len.cint, cast[ptr char](addr signature), addr sigsize)
+
+  template rsSign(meth: typed): string =
+    var res = crypto.signPEM(toSign, secret, meth, crypto.EVP_PKEY_RSA)
+    var s = newString(res.len)
+    copyMem(addr s[0], addr res[0], res.len)
+    s
+
   case algorithm
   of HS256:
-    discard hmac.HMAC(hmac.EVP_sha256(), unsafeAddr(secret[0]), 8, toSign.cstring, toSign.len.cint, cast[ptr char](addr signature), addr sigsize)
+    hsSign(crypto.EVP_sha256())
   of HS384:
-    discard hmac.HMAC(hmac.EVP_sha384(), unsafeAddr(secret[0]), 8, toSign.cstring, toSign.len.cint, cast[ptr char](addr signature), addr sigsize)
+    hsSign(crypto.EVP_sha384())
   of HS512:
-    discard hmac.HMAC(hmac.EVP_sha512(), unsafeAddr(secret[0]), 8, toSign.cstring, toSign.len.cint, cast[ptr char](addr signature), addr sigsize)
+    hsSign(crypto.EVP_sha512())
+  of RS256:
+    return rsSign(crypto.EVP_sha256())
+  of RS384:
+    return rsSign(crypto.EVP_sha384())
+  of RS512:
+    return rsSign(crypto.EVP_sha512())
   else:
     raise newException(UnsupportedAlgorithm, $algorithm & " isn't supported")
   result = join(signature.map((i: uint8) => (toHex(BiggestInt(i), 2))), "")
