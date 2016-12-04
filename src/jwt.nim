@@ -1,4 +1,4 @@
-import future, json, strutils, tables, times
+import future, json, strutils, tables, times, sequtils
 
 from private/hmac import nil
 
