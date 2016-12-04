@@ -43,7 +43,8 @@ proc newSUB*(node: JsonNode): Claim =
 
 # AUD
 proc newAUD*(node: JsonNode): Claim =
-    checkJsonNodeKind(node, JArray)
+    if node.kind != JArray and node.kind != JString:
+        raise newException(ValueError, "Invalid kind")
     return newClaim(AUD, node)
 
 proc newAUD*(recipients: seq[string]): Claim =
