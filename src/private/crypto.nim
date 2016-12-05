@@ -56,6 +56,9 @@ proc EVP_DigestSignFinal*(ctx: EVP_MD_CTX, data: pointer, len: ptr csize): cint 
 proc EVP_PKEY_CTX_new*(pkey: EVP_PKEY, e: ENGINE): EVP_PKEY_CTX {.cdecl, importc.}
 proc EVP_PKEY_sign_init*(c: EVP_PKEY_CTX): cint {.cdecl, importc.}
 
+when not declared(BIO_new_mem_buf):
+  proc BIO_new_mem_buf*(data: pointer, len: cint): BIO{.cdecl, importc.}
+
 proc signPem*(data, key: string, alg: EVP_MD, typ: cint): seq[uint8] =
   var bufkey: BIO
   var pkey: EVP_PKEY
