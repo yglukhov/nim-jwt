@@ -14,8 +14,6 @@ export EVP_PKEY_RSA
 const
   HMAC_MAX_MD_CBLOCK* = 128
 
-const sslIsOld = true #libHasSymbol(libcrypto, "EVP_MD_CTX_create")
-
 type
   EVP_MD* = SslPtr
   EVP_MD_CTX* = SslPtr
@@ -46,15 +44,14 @@ proc PEM_read_bio_PrivateKey*(bp: BIO, x: ptr EVP_PKEY,
             cb: pointer, u: pointer): EVP_PKEY {.cdecl, importc.}
 proc EVP_PKEY_free*(p: EVP_PKEY)  {.cdecl, importc.}
 
-when sslIsOld:
-  proc EVP_MD_CTX_create*(): EVP_MD_CTX {.cdecl, importc.}
-  proc EVP_MD_CTX_destroy*(ctx: EVP_MD_CTX) {.cdecl, importc.}
-else:
-  proc EVP_MD_CTX_create*(): EVP_MD_CTX {.cdecl, importc: "EVP_MD_CTX_new".}
-  proc EVP_MD_CTX_destroy*(ctx: EVP_MD_CTX) {.cdecl, importc: "EVP_MD_CTX_free".}
 
-proc EVP_DigestSignInit*(ctx: EVP_MD_CTX, pctx: ptr EVP_PKEY_CTX,
-            typ: EVP_MD, e: ENGINE, pkey: EVP_PKEY): cint {.cdecl, importc.}
+proc EVP_MD_CTX_create*(): EVP_MD_CTX {.cdecl, importc.}
+proc EVP_MD_CTX_destroy*(ctx: EVP_MD_CTX) {.cdecl, importc.}
+# some times you will need this instead:
+#proc EVP_MD_CTX_create*(): EVP_MD_CTX {.cdecl, importc: "EVP_MD_CTX_new".}
+#proc EVP_MD_CTX_destroy*(ctx: EVP_MD_CTX) {.cdecl, importc: "EVP_MD_CTX_free".}
+
+proc EVP_DigestSignInit*(ctx: EVP_MD_CTX, pctx: ptr EVP_PKEY_CTX, typ: EVP_MD, e: ENGINE, pkey: EVP_PKEY): cint {.cdecl, importc.}
 
 proc EVP_DigestSignUpdate*(ctx: EVP_MD_CTX, data: pointer, len: cuint): cint {.cdecl, importc: "EVP_DigestUpdate".}
 proc EVP_DigestSignFinal*(ctx: EVP_MD_CTX, data: pointer, len: ptr csize): cint {.cdecl, importc.}

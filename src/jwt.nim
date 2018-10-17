@@ -5,45 +5,42 @@ from private/crypto import nil
 import private/claims, private/jose, private/utils
 
 type
-    InvalidToken* = object of Exception
+  InvalidToken* = object of Exception
 
-    JWT* = object
-        headerB64: string
-        claimsB64: string
-        header*: JOSEHeader
-        claims*: TableRef[string, Claim]
-        signature*: string
+  JWT* = object
+    headerB64: string
+    claimsB64: string
+    header*: JOSEHeader
+    claims*: TableRef[string, Claim]
+    signature*: string
 
 export claims
 export jose
 
-
-
 proc splitToken(s: string): seq[string] =
-    let parts = s.split(".")
-    if parts.len != 3:
-        raise newException(InvalidToken, "Invalid token")
-    result = parts
+  let parts = s.split(".")
+  if parts.len != 3:
+    raise newException(InvalidToken, "Invalid token")
+  result = parts
 
 
 # Load up a b64url string to JWT
 proc toJWT*(s: string): JWT =
-    var parts = splitToken(s)
-    let
-      headerB64 = parts[0]
-      claimsB64 = parts[1]
-      headerJson = parseJson(decodeUrlSafe(headerB64))
-      claimsJson = parseJson(decodeUrlSafe(claimsB64))
-      signature = decodeUrlSafe(parts[2])
+  var parts = splitToken(s)
+  let
+    headerB64 = parts[0]
+    claimsB64 = parts[1]
+    headerJson = parseJson(decodeUrlSafe(headerB64))
+    claimsJson = parseJson(decodeUrlSafe(claimsB64))
+    signature = decodeUrlSafe(parts[2])
 
-    result = JWT(
-        headerB64: headerB64,
-        claimsB64: claimsB64,
-        header: headerJson.toHeader(),
-        claims: claimsJson.toClaims(),
-        signature: signature
-    )
-
+  result = JWT(
+    headerB64: headerB64,
+    claimsB64: claimsB64,
+    header: headerJson.toHeader(),
+    claims: claimsJson.toClaims(),
+    signature: signature
+  )
 
 proc toJWT*(node: JsonNode): JWT =
   let claims = node["claims"].toClaims
