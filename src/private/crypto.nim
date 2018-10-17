@@ -3,7 +3,7 @@ import openssl, linktools
 # TODO: Linkage flags should probably need more attention because of different
 # openssl versions. E.g. DigestSign* functions are not available in old openssl.
 when defined(macosx):
-  const libcrypto = "crypto.35"
+  const libcrypto = "crypto"
 else:
   const libcrypto = "crypto"
 
@@ -14,7 +14,7 @@ export EVP_PKEY_RSA
 const
   HMAC_MAX_MD_CBLOCK* = 128
 
-const sslIsOld = libHasSymbol(libcrypto, "EVP_MD_CTX_create")
+const sslIsOld = true #libHasSymbol(libcrypto, "EVP_MD_CTX_create")
 
 type
   EVP_MD* = SslPtr
