@@ -24,15 +24,15 @@ var secret = "secret"
 
 proc sign*(userId: string): string =
   var token = toJWT(%*{
-      "header": {
-        "alg": "HS256",
-        "typ": "JWT"
-      },
-      "claims": {
-        "userId": userId,
-        "exp": (getTime() + 1.days).toSeconds().int
-      }
-    })
+    "header": {
+      "alg": "HS256",
+      "typ": "JWT"
+    },
+    "claims": {
+      "userId": userId,
+      "exp": (getTime() + 1.days).toSeconds().int
+    }
+  })
 
   token.sign(secret)
 
