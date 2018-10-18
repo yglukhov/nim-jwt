@@ -1,13 +1,15 @@
-import openssl, linktools
+import openssl
+
+const libcrypto = DLLUtilName
 
 # TODO: Linkage flags should probably need more attention because of different
 # openssl versions. E.g. DigestSign* functions are not available in old openssl.
-when defined(macosx):
-  const libcrypto = "crypto"
-else:
-  const libcrypto = "crypto"
+# when defined(macosx):
+#   const libcrypto = "crypto"
+# else:
+#   const libcrypto = "crypto"
 
-{.passL: "-l" & libcrypto.}
+# {.passL: "-l" & libcrypto.}
 
 export EVP_PKEY_RSA
 
@@ -45,11 +47,13 @@ proc PEM_read_bio_PrivateKey*(bp: BIO, x: ptr EVP_PKEY,
 proc EVP_PKEY_free*(p: EVP_PKEY)  {.cdecl, importc.}
 
 
-proc EVP_MD_CTX_create*(): EVP_MD_CTX {.cdecl, importc.}
-proc EVP_MD_CTX_destroy*(ctx: EVP_MD_CTX) {.cdecl, importc.}
-# some times you will need this instead:
-#proc EVP_MD_CTX_create*(): EVP_MD_CTX {.cdecl, importc: "EVP_MD_CTX_new".}
-#proc EVP_MD_CTX_destroy*(ctx: EVP_MD_CTX) {.cdecl, importc: "EVP_MD_CTX_free".}
+when defined(macosx):
+  proc EVP_MD_CTX_create*(): EVP_MD_CTX {.cdecl, importc.}
+  proc EVP_MD_CTX_destroy*(ctx: EVP_MD_CTX) {.cdecl, importc.}
+else:
+  # some times you will need this instead:
+  proc EVP_MD_CTX_create*(): EVP_MD_CTX {.cdecl, importc: "EVP_MD_CTX_new".}
+  proc EVP_MD_CTX_destroy*(ctx: EVP_MD_CTX) {.cdecl, importc: "EVP_MD_CTX_free".}
 
 proc EVP_DigestSignInit*(ctx: EVP_MD_CTX, pctx: ptr EVP_PKEY_CTX, typ: EVP_MD, e: ENGINE, pkey: EVP_PKEY): cint {.cdecl, importc.}
 
