@@ -57,7 +57,7 @@ proc toJWT*(node: JsonNode): JWT =
 
 # Encodes the raw signature hex to b64url
 proc signatureToB64(token: JWT): string =
-  assert token.signature != nil
+  assert token.signature.len != 0
   result = encodeUrlSafe(token.signature)
 
 
@@ -108,7 +108,7 @@ proc verifySignature*(data: string, signature: string, secret: string): bool =
 
 
 proc sign*(token: var JWT, secret: string) =
-  assert token.signature == nil
+  assert token.signature.len == 0
   token.signature = signString(token.parsed, secret, token.header.alg)
 
 
