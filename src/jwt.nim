@@ -97,6 +97,8 @@ proc signString*(toSign: string, secret: string, algorithm: SignatureAlgorithm =
     return rsSign(crypto.EVP_sha384())
   of RS512:
     return rsSign(crypto.EVP_sha512())
+  of ES384:
+    return rsSign(crypto.EVP_sha384())
   else:
     raise newException(UnsupportedAlgorithm, $algorithm & " isn't supported")
   result = join(signature.map((i: uint8) => (toHex(BiggestInt(i), 2))), "")
