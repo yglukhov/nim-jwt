@@ -1,16 +1,4 @@
 import openssl
-
-const libcrypto = DLLUtilName
-
-# TODO: Linkage flags should probably need more attention because of different
-# openssl versions. E.g. DigestSign* functions are not available in old openssl.
-# when defined(macosx):
-#   const libcrypto = "crypto"
-# else:
-#   const libcrypto = "crypto"
-
-# {.passL: "-l" & libcrypto.}
-
 export EVP_PKEY_RSA
 
 const
