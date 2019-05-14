@@ -22,7 +22,7 @@ proc encodeUrlSafe*(s: string): string =
   result = base64.encode(s, newLine="")
   while result.endsWith("="):
     result = result.substr(0, result.high-1)
-    result = result.replace('+', '-').replace('/', '_')
+  result = result.replace('+', '-').replace('/', '_')
 
 
 proc decodeUrlSafe*(s: string): string =
