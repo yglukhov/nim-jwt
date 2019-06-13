@@ -4,8 +4,6 @@ author        = "Endre Karlson"
 description   = "JSON Web Tokens for Nim"
 license       = "MIT"
 
-srcDir = "src"
-
 # Deps
 requires "nim >= 0.19.0"
 requires "https://github.com/yglukhov/linktools"
