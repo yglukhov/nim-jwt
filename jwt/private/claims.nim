@@ -1,4 +1,4 @@
-import future, json, sequtils, strutils, times, tables
+import json, sequtils, strutils, times, tables
 
 import utils
 
@@ -72,7 +72,7 @@ proc newTimeClaim*(k: ClaimKind, i: int64): Claim =
 
 # Returns the claimKeyms value as a time
 proc getClaimTime*(c: Claim): Time =
-  result = fromSeconds(c.node.num)
+  result = fromUnix(c.node.num)
 
 # NBF
 proc newNBF*(s: string): Claim = return newTimeClaim(NBF, s)

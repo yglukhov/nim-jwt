@@ -1,7 +1,7 @@
 import json, times, unittest
 from times import nil
 
-import jwt
+import ../jwt
 
 proc getToken(claims: JsonNode = newJObject(), header: JsonNode = newJObject()): JWT =
   let claims = claims.toClaims
@@ -32,14 +32,14 @@ suite "Token tests":
 
   test "NBF Check":
     let
-      now = getTime().toSeconds.int + 60
+      now = getTime().toUnix.int + 60
       token = getToken(claims = %{"nbf": %now})
     expect(InvalidToken):
       token.verifyTimeClaims
 
   test "EXP Check":
     let
-      now = getTime().toSeconds.int - 60
+      now = getTime().toUnix.int - 60
       token = getToken(claims = %{"exp": %now})
     expect(InvalidToken):
       token.verifyTimeClaims
