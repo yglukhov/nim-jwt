@@ -1,8 +1,20 @@
-import openssl
+import openssl, linktools
+
+# TODO: Linkage flags should probably need more attention because of different
+# openssl versions. E.g. DigestSign* functions are not available in old openssl.
+when defined(macosx):
+  const libcrypto = "crypto.35"
+else:
+  const libcrypto = "crypto"
+
+{.passL: "-l" & libcrypto.}
+
 export EVP_PKEY_RSA
 
 const
   HMAC_MAX_MD_CBLOCK* = 128
+
+const sslIsOld = libHasSymbol(libcrypto, "EVP_MD_CTX_create")
 
 type
   EVP_MD* = SslPtr
@@ -35,7 +47,7 @@ proc PEM_read_bio_PrivateKey*(bp: BIO, x: ptr EVP_PKEY,
 proc EVP_PKEY_free*(p: EVP_PKEY)  {.cdecl, importc.}
 
 
-when defined(macosx):
+when sslIsOld:
   proc EVP_MD_CTX_create*(): EVP_MD_CTX {.cdecl, importc.}
   proc EVP_MD_CTX_destroy*(ctx: EVP_MD_CTX) {.cdecl, importc.}
 else:

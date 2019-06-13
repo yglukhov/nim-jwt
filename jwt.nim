@@ -1,8 +1,8 @@
-import future, json, strutils, tables, times, sequtils
+import json, strutils, tables, times, sequtils
 
-from private/crypto import nil
+from jwt/private/crypto import nil
 
-import private/claims, private/jose, private/utils
+import jwt/private/[claims, jose, utils]
 
 type
   InvalidToken* = object of Exception
@@ -98,7 +98,7 @@ proc signString*(toSign: string, secret: string, algorithm: SignatureAlgorithm =
     return rsSign(crypto.EVP_sha384())
   else:
     raise newException(UnsupportedAlgorithm, $algorithm & " isn't supported")
-  result = join(signature.map((i: uint8) => (toHex(BiggestInt(i), 2))), "")
+  result = join(signature.mapIt(toHex(BiggestInt(it), 2)), "")
 
 # Verify that the token is not tampered with
 proc verifySignature*(data: string, signature: string, secret: string): bool =
