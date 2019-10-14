@@ -73,7 +73,7 @@ proc signString*(toSign: string, secret: string, algorithm: SignatureAlgorithm =
     sigsize: cuint
 
   template hsSign(meth: typed) =
-    discard crypto.HMAC(meth, unsafeAddr(secret[0]), 8, toSign.cstring, toSign.len.cint, cast[ptr char](addr signature), addr sigsize)
+    discard crypto.HMAC(meth, unsafeAddr(secret[0]), 8, toSign.cstring, toSign.len.csize, cast[ptr char](addr signature), addr sigsize)
 
   template rsSign(meth: typed): string =
     var res = crypto.signPEM(toSign, secret, meth, crypto.EVP_PKEY_RSA)
