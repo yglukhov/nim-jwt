@@ -63,9 +63,9 @@ The key should be Acquired from google api console
 -----END PRIVATE KEY-----
 """
 
-var tok = JWT(
-  header: JOSEHeader(alg: RS256, typ: "JWT"),
-  claims: toClaims(%*{
+var tok = initJWT(
+  header = JOSEHeader(alg: RS256, typ: "JWT"),
+  claims = toClaims(%*{
   "iss": email,
   "scope": scope,
   "aud": "https://www.googleapis.com/oauth2/v4/token",
