@@ -89,8 +89,12 @@ proc signString*(toSign: string, secret: string, algorithm: SignatureAlgorithm =
     return rsSign(sha384Vtable, HASH_OID_SHA384, sha384SIZE)
   of RS512:
     return rsSign(sha512Vtable, HASH_OID_SHA512, sha512SIZE)
-  # of ES256:
-  #   return ecSign(ecPrimeI15, sha256Vtable)
+  of ES256:
+    return ecSign(ecAllM15, sha256Vtable)
+  of ES384:
+    return ecSign(ecAllM15, sha384Vtable)
+  of ES512:
+    return ecSign(ecAllM15, sha512Vtable)
 
   # of ES384:
   #   return rsSign(crypto.EVP_sha384())

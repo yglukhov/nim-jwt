@@ -57,23 +57,49 @@ e+lf4s4OxQawWD79J9/5d3Ry0vbV3Am1FtGJiJvOwRsIfVChDpYStTcHTCMqtvWb
 V6L11BWkpzGXSW4Hv43qa+GSYOD2QU68Mb59oSk2OB+BtOLpJofmbGEGgvmwyCI9
 MwIDAQAB
 -----END PUBLIC KEY-----"""
-  ecPrivateKey = """-----BEGIN PRIVATE KEY-----
+  ec256PrivKey = """-----BEGIN PRIVATE KEY-----
 MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgevZzL1gdAFr88hb2
 OF/2NxApJCzGCEDdfSp6VQO30hyhRANCAAQRWz+jn65BtOMvdyHKcvjBeBSDZH2r
 1RTwjmYSi9R/zpBnuQ4EiMnCqfMPWiZqB4QdbAd0E7oH50VpuZ1P087G
 -----END PRIVATE KEY-----"""
-  ecPublicKey = """-----BEGIN PUBLIC KEY-----
+  ec256PubKey = """-----BEGIN PUBLIC KEY-----
 MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEEVs/o5+uQbTjL3chynL4wXgUg2R9
 q9UU8I5mEovUf86QZ7kOBIjJwqnzD1omageEHWwHdBO6B+dFabmdT9POxg==
 -----END PUBLIC KEY-----"""
+
+  ec384PrivKey = """-----BEGIN EC PRIVATE KEY-----
+MIGkAgEBBDCAHpFQ62QnGCEvYh/pE9QmR1C9aLcDItRbslbmhen/h1tt8AyMhske
+enT+rAyyPhGgBwYFK4EEACKhZANiAAQLW5ZJePZzMIPAxMtZXkEWbDF0zo9f2n4+
+T1h/2sh/fviblc/VTyrv10GEtIi5qiOy85Pf1RRw8lE5IPUWpgu553SteKigiKLU
+PeNpbqmYZUkWGh3MLfVzLmx85ii2vMU=
+-----END EC PRIVATE KEY-----"""
+  ec384PubKey = """-----BEGIN PUBLIC KEY-----
+MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEC1uWSXj2czCDwMTLWV5BFmwxdM6PX9p+
+Pk9Yf9rIf374m5XP1U8q79dBhLSIuaojsvOT39UUcPJROSD1FqYLued0rXiooIii
+1D3jaW6pmGVJFhodzC31cy5sfOYotrzF
+-----END PUBLIC KEY-----"""
+  ec512PrivKey = """-----BEGIN EC PRIVATE KEY-----
+MIHcAgEBBEIBiyAa7aRHFDCh2qga9sTUGINE5jHAFnmM8xWeT/uni5I4tNqhV5Xx
+0pDrmCV9mbroFtfEa0XVfKuMAxxfZ6LM/yKgBwYFK4EEACOhgYkDgYYABAGBzgdn
+P798FsLuWYTDDQA7c0r3BVk8NnRUSexpQUsRilPNv3SchO0lRw9Ru86x1khnVDx+
+duq4BiDFcvlSAcyjLACJvjvoyTLJiA+TQFdmrearjMiZNE25pT2yWP1NUndJxPcv
+VtfBW48kPOmvkY4WlqP5bAwCXwbsKrCgk6xbsp12ew==
+-----END EC PRIVATE KEY-----"""
+  ec512PubKey = """-----BEGIN PUBLIC KEY-----
+MIGbMBAGByqGSM49AgEGBSuBBAAjA4GGAAQBgc4HZz+/fBbC7lmEww0AO3NK9wVZ
+PDZ0VEnsaUFLEYpTzb90nITtJUcPUbvOsdZIZ1Q8fnbquAYgxXL5UgHMoywAib47
+6MkyyYgPk0BXZq3mq4zImTRNuaU9slj9TVJ3ScT3L1bXwVuPJDzpr5GOFpaj+WwM
+Al8G7CqwoJOsW7Kddns=
+-----END PUBLIC KEY-----"""
+
 
 proc signedRSToken(alg: string): JWT =
   result = tokenWithAlg(alg)
   result.sign(rsPrivateKey)
 
-proc signedECToken(alg: string): JWT =
+proc signedECToken(alg, key: string): JWT =
   result = tokenWithAlg(alg)
-  result.sign(ecPrivateKey)
+  result.sign(key)
 
 suite "Token tests":
   test "Load from JSON and verify":
@@ -120,17 +146,20 @@ suite "Token tests":
       signedRSToken("RS384").verify(rsPublicKey)
       signedRSToken("RS512").verify(rsPublicKey)
 
-  when false:
-    test "EC Signature":
-      # Checked with https://jwt.io/
-      # echo signedECToken("ES256")
-      check:
-        signedECToken("ES256").header.toBase64 == "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9"
-        signedECToken("ES256").claims.toBase64 == "eyJuYW1lIjoiSm9obiBEb2UiLCJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNTE2MjM5MDIyfQ"
-        # signedECToken("ES256").verify(ecPublicKey)
-        # toJWT("eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.tyh-VfuzIxCyGYDlkBA7DfyjrqmSHu6pQ2hoZuFqUSLPNY2N0mpHb3nk5K17HWP_3cYHBw7AhHale5wky6-sVA").verify(ecPublicKey)
+  test "EC Signature":
+    # Checked with https://jwt.io/
+    # echo signedECToken("ES256")
+    check:
+      signedECToken("ES256", ec256PrivKey).header.toBase64 == "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9"
+      signedECToken("ES256", ec256PrivKey).claims.toBase64 == "eyJuYW1lIjoiSm9obiBEb2UiLCJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNTE2MjM5MDIyfQ"
 
-        # $signedECToken("ES256") == "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiSm9obiBEb2UiLCJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNTE2MjM5MDIyfQ.gDQjM0w-foh2h54D2eNV5JzKa2Y5lwoU168jlj2IImH8DDhGHFrjfjstmXos8zGv9iHFzLp5HPYjOZDV_BqX7Q"
+      $signedECToken("ES256", ec256PrivKey) == "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiSm9obiBEb2UiLCJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNTE2MjM5MDIyfQ.Z70NdbsTiPV5PpE2foY9YSehQCm20naEKPLdCZy_dV2W6uPLJTOY6JvAA9r9gykdxuH6dbTZUPo2yxRjpxJrJg"
+      $signedECToken("ES384", ec384PrivKey) == "eyJhbGciOiJFUzM4NCIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiSm9obiBEb2UiLCJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNTE2MjM5MDIyfQ.OkBilspLWGezXYP0A2i5nIT98makjx5RSgDol4N8_vgvyiUpJK5IaI-xGEJ5iJbIASR-YJT4zfPcMdEiPGd6LxBhinYl8EuTDyaipwdYHj1t_DzrsadqxAtlKXtcPGmj"
+      $signedECToken("ES512", ec512PrivKey) == "eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiSm9obiBEb2UiLCJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNTE2MjM5MDIyfQ.AWJbyLizFO3Hbz71V5WtvFRMluPEll3PxqyW9Hze3WI_3xyrxr48UCa5m3Vj60nUKfx3qMTSrc-onHPNFWr4XuadATyrybfhaGiTe0KL5H2V3nO3dC2uSD-lqLL9OXq_YgBwpbvqP1w5RslTfYg3lpCXGy4i6zWPCIfARwNJ3IdkFoFW"
 
-        # eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiSm9obiBEb2UiLCJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNTE2MjM5MDIyfQ.gDQjM0w-foh2h54D2eNV5JzKa2Y5lwoU168jlj2IImH8DDhGHFrjfjstmXos8zGv9iHFzLp5HPYjOZDV_BqX7Q"
-        # $signedECToken("ES256") was eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiSm9obiBEb2UiLCJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNTE2MjM5MDIyfQ.Z70NdbsTiPV5PpE2foY9YSehQCm20naEKPLdCZy_dV2W6uPLJTOY6JvAA9r9gykdxuH6dbTZUPo2yxRjpxJrJg
+      # signedECToken("ES256").verify(ecPublicKey)
+      # toJWT("eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.tyh-VfuzIxCyGYDlkBA7DfyjrqmSHu6pQ2hoZuFqUSLPNY2N0mpHb3nk5K17HWP_3cYHBw7AhHale5wky6-sVA").verify(ecPublicKey)
+
+
+      # eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiSm9obiBEb2UiLCJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNTE2MjM5MDIyfQ.gDQjM0w-foh2h54D2eNV5JzKa2Y5lwoU168jlj2IImH8DDhGHFrjfjstmXos8zGv9iHFzLp5HPYjOZDV_BqX7Q"
+      # $signedECToken("ES256") was eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiSm9obiBEb2UiLCJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNTE2MjM5MDIyfQ.Z70NdbsTiPV5PpE2foY9YSehQCm20naEKPLdCZy_dV2W6uPLJTOY6JvAA9r9gykdxuH6dbTZUPo2yxRjpxJrJg
