@@ -13,7 +13,7 @@ proc bearHMAC*(digestVtable: ptr HashClass; key, d: string): seq[byte] =
 proc invalidPemKey() =
   raise newException(Exception, "Invalid PEM encoding")
 
-proc pemDecoderLoop(pem: string, prc: proc(ctx: pointer, pbytes: pointer, nbytes: int) {.cdecl.}, ctx: pointer) =
+proc pemDecoderLoop(pem: string, prc: proc(ctx: pointer, pbytes: pointer, nbytes: int) {.cdecl, gcsafe.}, ctx: pointer) =
   var pemCtx: PemDecoderContext
   pemDecoderInit(addr pemCtx)
   var length = len(pem)
@@ -41,12 +41,12 @@ proc pemDecoderLoop(pem: string, prc: proc(ctx: pointer, pbytes: pointer, nbytes
 
 proc decodeFromPem(skCtx: var SkeyDecoderContext, pem: string) =
   skeyDecoderInit(addr skCtx)
-  pemDecoderLoop(pem, cast[proc(ctx: pointer, pbytes: pointer, nbytes: int) {.cdecl.}](skeyDecoderPush), addr skCtx)
+  pemDecoderLoop(pem, cast[proc(ctx: pointer, pbytes: pointer, nbytes: int) {.cdecl, gcsafe.}](skeyDecoderPush), addr skCtx)
   if skeyDecoderLastError(addr skCtx) != 0: invalidPemKey()
 
 proc decodeFromPem(pkCtx: var PkeyDecoderContext, pem: string) =
   pkeyDecoderInit(addr pkCtx)
-  pemDecoderLoop(pem, cast[proc(ctx: pointer, pbytes: pointer, nbytes: int) {.cdecl.}](pkeyDecoderPush), addr pkCtx)
+  pemDecoderLoop(pem, cast[proc(ctx: pointer, pbytes: pointer, nbytes: int) {.cdecl, gcsafe.}](pkeyDecoderPush), addr pkCtx)
   if pkeyDecoderLastError(addr pkCtx) != 0: invalidPemKey()
 
 proc calcHash(alg: ptr HashClass, data: string, output: var array[64, byte]) =
