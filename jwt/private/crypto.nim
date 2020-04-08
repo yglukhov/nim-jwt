@@ -1,5 +1,8 @@
 import bearssl, bearssl_pkey_decoder
 
+# This pragma should be the same as in nim-bearssl/decls.nim
+{.pragma: bearSslFunc, cdecl, gcsafe, noSideEffect, raises: [].}
+
 proc bearHMAC*(digestVtable: ptr HashClass; key, d: string): seq[byte] =
   var hKey: HmacKeyContext
   var hCtx: HmacContext
@@ -13,7 +16,7 @@ proc bearHMAC*(digestVtable: ptr HashClass; key, d: string): seq[byte] =
 proc invalidPemKey() =
   raise newException(Exception, "Invalid PEM encoding")
 
-proc pemDecoderLoop(pem: string, prc: proc(ctx: pointer, pbytes: pointer, nbytes: int) {.cdecl, noSideEffect, gcsafe.}, ctx: pointer) =
+proc pemDecoderLoop(pem: string, prc: proc(ctx: pointer, pbytes: pointer, nbytes: int) {.bearSslFunc.}, ctx: pointer) =
   var pemCtx: PemDecoderContext
   pemDecoderInit(addr pemCtx)
   var length = len(pem)
@@ -41,12 +44,12 @@ proc pemDecoderLoop(pem: string, prc: proc(ctx: pointer, pbytes: pointer, nbytes
 
 proc decodeFromPem(skCtx: var SkeyDecoderContext, pem: string) =
   skeyDecoderInit(addr skCtx)
-  pemDecoderLoop(pem, cast[proc(ctx: pointer, pbytes: pointer, nbytes: int) {.cdecl, noSideEffect, gcsafe.}](skeyDecoderPush), addr skCtx)
+  pemDecoderLoop(pem, cast[proc(ctx: pointer, pbytes: pointer, nbytes: int) {.bearSslFunc.}](skeyDecoderPush), addr skCtx)
   if skeyDecoderLastError(addr skCtx) != 0: invalidPemKey()
 
 proc decodeFromPem(pkCtx: var PkeyDecoderContext, pem: string) =
   pkeyDecoderInit(addr pkCtx)
-  pemDecoderLoop(pem, cast[proc(ctx: pointer, pbytes: pointer, nbytes: int) {.cdecl, noSideEffect, gcsafe.}](pkeyDecoderPush), addr pkCtx)
+  pemDecoderLoop(pem, cast[proc(ctx: pointer, pbytes: pointer, nbytes: int) {.bearSslFunc.}](pkeyDecoderPush), addr pkCtx)
   if pkeyDecoderLastError(addr pkCtx) != 0: invalidPemKey()
 
 proc calcHash(alg: ptr HashClass, data: string, output: var array[64, byte]) =
