@@ -7,9 +7,9 @@ This is a implementation of JSON Web Tokens for Nim, it allows for the following
 
 `proc toJWT*(s: string): JWT` - parse a base64 string to decode it to a JWT token object
 
-`sign*(token: var JWT, secret: var string)` - sign a token. Creates a `signature` property on the given token and assigns the signature to it.
+`sign*(token: var JWT, secret: string)` - sign a token. Creates a `signature` property on the given token and assigns the signature to it.
 
-`proc verify*(token: JWT, secret: var string): bool` - verify a token (typically on your incoming requests)
+`proc verify*(token: JWT, secret: string, alg: SignatureAlgorithm): bool` - verify a token (typically on your incoming requests)
 
 `proc $*(token: JWT): string` - creates a b64url string from the token
 
@@ -22,7 +22,7 @@ import jwt, times, json, tables
 
 var secret = "secret"
 
-proc sign*(userId: string): string =
+proc sign(userId: string): string =
   var token = toJWT(%*{
     "header": {
       "alg": "HS256",
@@ -38,14 +38,14 @@ proc sign*(userId: string): string =
 
   result = $token
 
-proc verify*(token: string): bool =
+proc verify(token: string): bool =
   try:
     let jwtToken = token.toJWT()
-    result = jwtToken.verify(secret)
+    result = jwtToken.verify(secret, HS256)
   except InvalidToken:
     result = false
 
-proc decode*(token: string): string =
+proc decode(token: string): string =
   let jwt = token.toJWT()
   result = $jwt.claims["userId"].node.str
 
