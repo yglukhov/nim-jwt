@@ -112,7 +112,7 @@ suite "Token tests":
 
     let b64Token = $token
     token = b64Token.toJWT
-    check token.verify(secret) == true
+    check token.verify(secret, token.header.alg) == true
 
   test "NBF Check":
     let
@@ -142,9 +142,9 @@ suite "Token tests":
       $signedRSToken("RS384") == "eyJhbGciOiJSUzM4NCIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiSm9obiBEb2UiLCJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNTE2MjM5MDIyfQ.OGwjm7YvGCh4gpIuFnM7K88_dEeiSAWzpR0dXzhsne1IPygnXRKoTCdmhA2a01Mj_cW6tWhufSGcuu-7vmdm5Hi8hoDe5Q92kmM44oWikKptCy_zIM_Roe30TPjXxweE_WjV1fMZaAX6UFumikrtWCTcb9rLnSjpHYFgo-buS7cBXg_nK7xgOPz-bQvv8edVWsBWPf92B9Mak-LNZla_F5EAOjXrN16ZQ1y4qE94ro051kryqUddfVonmLSjCrCavttfBMugYf-SCbLp0w_QLaT9gA_bMXVzqyLnIj74Sr_JCWAxcYU5RaFmqZLEpowyp-m9XGdBwVS2118K0TooZg"
       $signedRSToken("RS512") == "eyJhbGciOiJSUzUxMiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiSm9obiBEb2UiLCJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNTE2MjM5MDIyfQ.dgb3ak_0nwQyLa2Ssmq3Jok-pr9QfVFnw_63YlFXTkq_V8r816VeCOzBRYvVv6ONvKGZDR_3SAqf3UJp1XkXtN-VyJ7VRoSHZ0d0-3DPArxDrIu20uvoQrbm4LqQtwbGPH-B-Z-7Bvfng-iwhOt1S717AepZsgVjQz2gOvBvzFsg_BDZ6nhU-5GOnIRkJ2amUt5N1TXbzKHkNLtMpKlq1BZbdv_xKSHgw_IHQRl9lIIQs_2_NuTgk8nQQiwtb9L1v3Y3KYpYGCBvgohWDcpyUKOv5f2EHekDpj1f_ALltd8gzWhIDgwK5VbBo8JAkLWDRfeTOS0fh0Faenfn551wqA"
 
-      signedRSToken("RS256").verify(rsPublicKey)
-      signedRSToken("RS384").verify(rsPublicKey)
-      signedRSToken("RS512").verify(rsPublicKey)
+      signedRSToken("RS256").verify(rsPublicKey, RS256)
+      signedRSToken("RS384").verify(rsPublicKey, RS384)
+      signedRSToken("RS512").verify(rsPublicKey, RS512)
 
   test "EC Signature":
     # Checked with https://jwt.io/
@@ -157,7 +157,7 @@ suite "Token tests":
       $signedECToken("ES384", ec384PrivKey) == "eyJhbGciOiJFUzM4NCIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiSm9obiBEb2UiLCJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNTE2MjM5MDIyfQ.OkBilspLWGezXYP0A2i5nIT98makjx5RSgDol4N8_vgvyiUpJK5IaI-xGEJ5iJbIASR-YJT4zfPcMdEiPGd6LxBhinYl8EuTDyaipwdYHj1t_DzrsadqxAtlKXtcPGmj"
       $signedECToken("ES512", ec512PrivKey) == "eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiSm9obiBEb2UiLCJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNTE2MjM5MDIyfQ.AWJbyLizFO3Hbz71V5WtvFRMluPEll3PxqyW9Hze3WI_3xyrxr48UCa5m3Vj60nUKfx3qMTSrc-onHPNFWr4XuadATyrybfhaGiTe0KL5H2V3nO3dC2uSD-lqLL9OXq_YgBwpbvqP1w5RslTfYg3lpCXGy4i6zWPCIfARwNJ3IdkFoFW"
 
-      # signedECToken("ES256").verify(ecPublicKey)
+      # signedECToken("ES256").verify(ecPublicKey, ES256)
       # toJWT("eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.tyh-VfuzIxCyGYDlkBA7DfyjrqmSHu6pQ2hoZuFqUSLPNY2N0mpHb3nk5K17HWP_3cYHBw7AhHale5wky6-sVA").verify(ecPublicKey)
 
 

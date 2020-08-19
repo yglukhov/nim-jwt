@@ -103,7 +103,7 @@ proc signString*(toSign: string, secret: string, algorithm: SignatureAlgorithm =
 
 # Verify that the token is not tampered with
 proc verifySignature*(data: string, signature: seq[byte], secret: string,
-    alg: SignatureAlgorithm = HS256): bool =
+    alg: SignatureAlgorithm): bool =
   case alg
   of HS256, HS384, HS512:
     let dataSignature = signString(data, secret, alg)
@@ -125,8 +125,8 @@ proc sign*(token: var JWT, secret: string) =
   token.signature = signString(token.parsed, secret, token.header.alg)
 
 # Verify a token typically an incoming request
-proc verify*(token: JWT, secret: string): bool =
-  result = verifySignature(token.loaded, token.signature, secret, token.header.alg)
+proc verify*(token: JWT, secret: string, alg: SignatureAlgorithm): bool =
+  token.header.alg == alg and verifySignature(token.loaded, token.signature, secret, alg)
 
 proc toString*(token: JWT): string =
   token.header.toBase64 & "." & token.claims.toBase64 & "." & token.signatureToB64
