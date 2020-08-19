@@ -31,15 +31,15 @@ proc strToSignatureAlgorithm(s: string): SignatureAlgorithm =
 
 
 proc toHeader*(j: JsonNode): JOSEHeader =
-  let algStr = j["alg"].str
-  let algo = strToSignatureAlgorithm(algStr)
-
   # Check that the keys are present so we dont blow up.
   utils.checkKeysExists(j, "alg", "typ")
 
+  let algStr = j["alg"].getStr()
+  let algo = strToSignatureAlgorithm(algStr)
+
   result = JOSEHeader(
     alg: algo,
-    typ: j["typ"].str
+    typ: j["typ"].getStr()
   )
 
 
