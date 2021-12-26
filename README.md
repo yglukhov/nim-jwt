@@ -13,6 +13,10 @@ This is a implementation of JSON Web Tokens for Nim, it allows for the following
 
 `proc $*(token: JWT): string` - creates a b64url string from the token
 
+## Installation
+After installing nim's package manager `nimble` execute this:
+`nimble install jwt`
+
 ## Example
 
 An example to demonstrate use with a userId
