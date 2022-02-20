@@ -4,7 +4,6 @@ import utils
 
 
 type
-    InvalidClaim = object of Exception
     ClaimKind* = enum
         ISS,
         SUB,

@@ -3,8 +3,7 @@ import json, strutils
 import utils
 
 type
-  CryptoException* = object of Exception
-  UnsupportedAlgorithm* = object of CryptoException
+  UnsupportedAlgorithm* = object of ValueError
 
   SignatureAlgorithm* = enum
     NONE

@@ -3,11 +3,8 @@ import json, strutils
 from base64 import nil
 
 
-type
-  KeyError = object of Exception
-
 proc checkJsonNodeKind*(node: JsonNode, kind: JsonNodeKind) =
-  # Check that a given JsonNode has a given kind, raise InvalidClaim if not
+  # Check that a given JsonNode has a given kind, raise ValueError if not
   if node.kind != kind:
     raise newException(ValueError, "Invalid kind")
 

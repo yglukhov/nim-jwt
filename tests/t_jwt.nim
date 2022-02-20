@@ -79,11 +79,12 @@ Pk9Yf9rIf374m5XP1U8q79dBhLSIuaojsvOT39UUcPJROSD1FqYLued0rXiooIii
 1D3jaW6pmGVJFhodzC31cy5sfOYotrzF
 -----END PUBLIC KEY-----"""
   ec512PrivKey = """-----BEGIN EC PRIVATE KEY-----
-MIHcAgEBBEIBiyAa7aRHFDCh2qga9sTUGINE5jHAFnmM8xWeT/uni5I4tNqhV5Xx
-0pDrmCV9mbroFtfEa0XVfKuMAxxfZ6LM/yKgBwYFK4EEACOhgYkDgYYABAGBzgdn
-P798FsLuWYTDDQA7c0r3BVk8NnRUSexpQUsRilPNv3SchO0lRw9Ru86x1khnVDx+
-duq4BiDFcvlSAcyjLACJvjvoyTLJiA+TQFdmrearjMiZNE25pT2yWP1NUndJxPcv
-VtfBW48kPOmvkY4WlqP5bAwCXwbsKrCgk6xbsp12ew==
+MIHuAgEAMBAGByqGSM49AgEGBSuBBAAjBIHWMIHTAgEBBEIBiyAa7aRHFDCh2qga
+9sTUGINE5jHAFnmM8xWeT/uni5I4tNqhV5Xx0pDrmCV9mbroFtfEa0XVfKuMAxxf
+Z6LM/yKhgYkDgYYABAGBzgdnP798FsLuWYTDDQA7c0r3BVk8NnRUSexpQUsRilPN
+v3SchO0lRw9Ru86x1khnVDx+duq4BiDFcvlSAcyjLACJvjvoyTLJiA+TQFdmrear
+jMiZNE25pT2yWP1NUndJxPcvVtfBW48kPOmvkY4WlqP5bAwCXwbsKrCgk6xbsp12
+ew==
 -----END EC PRIVATE KEY-----"""
   ec512PubKey = """-----BEGIN PUBLIC KEY-----
 MIGbMBAGByqGSM49AgEGBSuBBAAjA4GGAAQBgc4HZz+/fBbC7lmEww0AO3NK9wVZ
@@ -148,21 +149,15 @@ suite "Token tests":
 
   test "EC Signature":
     # Checked with https://jwt.io/
-    # echo signedECToken("ES256")
     check:
       signedECToken("ES256", ec256PrivKey).header.toBase64 == "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9"
       signedECToken("ES256", ec256PrivKey).claims.toBase64 == "eyJuYW1lIjoiSm9obiBEb2UiLCJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNTE2MjM5MDIyfQ"
 
-      $signedECToken("ES256", ec256PrivKey) == "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiSm9obiBEb2UiLCJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNTE2MjM5MDIyfQ.Z70NdbsTiPV5PpE2foY9YSehQCm20naEKPLdCZy_dV2W6uPLJTOY6JvAA9r9gykdxuH6dbTZUPo2yxRjpxJrJg"
-      $signedECToken("ES384", ec384PrivKey) == "eyJhbGciOiJFUzM4NCIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiSm9obiBEb2UiLCJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNTE2MjM5MDIyfQ.OkBilspLWGezXYP0A2i5nIT98makjx5RSgDol4N8_vgvyiUpJK5IaI-xGEJ5iJbIASR-YJT4zfPcMdEiPGd6LxBhinYl8EuTDyaipwdYHj1t_DzrsadqxAtlKXtcPGmj"
-      $signedECToken("ES512", ec512PrivKey) == "eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiSm9obiBEb2UiLCJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNTE2MjM5MDIyfQ.AWJbyLizFO3Hbz71V5WtvFRMluPEll3PxqyW9Hze3WI_3xyrxr48UCa5m3Vj60nUKfx3qMTSrc-onHPNFWr4XuadATyrybfhaGiTe0KL5H2V3nO3dC2uSD-lqLL9OXq_YgBwpbvqP1w5RslTfYg3lpCXGy4i6zWPCIfARwNJ3IdkFoFW"
+      # We don't check signatures, as for ES* algorithms they are random
 
-      # signedECToken("ES256").verify(ecPublicKey, ES256)
-      # toJWT("eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.tyh-VfuzIxCyGYDlkBA7DfyjrqmSHu6pQ2hoZuFqUSLPNY2N0mpHb3nk5K17HWP_3cYHBw7AhHale5wky6-sVA").verify(ecPublicKey)
-
-
-      # eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiSm9obiBEb2UiLCJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNTE2MjM5MDIyfQ.gDQjM0w-foh2h54D2eNV5JzKa2Y5lwoU168jlj2IImH8DDhGHFrjfjstmXos8zGv9iHFzLp5HPYjOZDV_BqX7Q"
-      # $signedECToken("ES256") was eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiSm9obiBEb2UiLCJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNTE2MjM5MDIyfQ.Z70NdbsTiPV5PpE2foY9YSehQCm20naEKPLdCZy_dV2W6uPLJTOY6JvAA9r9gykdxuH6dbTZUPo2yxRjpxJrJg
+      signedECToken("ES256", ec256PrivKey).verify(ec256PubKey, ES256)
+      signedECToken("ES384", ec384PrivKey).verify(ec384PubKey, ES384)
+      signedECToken("ES512", ec512PrivKey).verify(ec512PubKey, ES512)
 
   test "header values":
     var token = toJWT(%*{

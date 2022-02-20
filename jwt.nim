@@ -6,7 +6,7 @@ from jwt/private/crypto import nil
 import jwt/private/[claims, jose, utils]
 
 type
-  InvalidToken* = object of Exception
+  InvalidToken* = object of ValueError
 
   JWT* = object
     headerB64: string
@@ -73,8 +73,8 @@ proc signString*(toSign: string, secret: string, algorithm: SignatureAlgorithm =
   template rsSign(hc, oid: typed, hashLen: int): seq[byte] =
     crypto.bearSignRSPem(toSign, secret, addr hc, oid, hashLen)
 
-  template ecSign(eng, hc: typed): seq[byte] =
-    crypto.bearSignECPem(toSign, secret, addr hc, addr eng)
+  template ecSign(hc: typed): seq[byte] =
+    crypto.bearSignECPem(toSign, secret, addr hc)
   
   case algorithm
   of HS256:
@@ -90,11 +90,11 @@ proc signString*(toSign: string, secret: string, algorithm: SignatureAlgorithm =
   of RS512:
     return rsSign(sha512Vtable, HASH_OID_SHA512, sha512SIZE)
   of ES256:
-    return ecSign(ecAllM15, sha256Vtable)
+    return ecSign(sha256Vtable)
   of ES384:
-    return ecSign(ecAllM15, sha384Vtable)
+    return ecSign(sha384Vtable)
   of ES512:
-    return ecSign(ecAllM15, sha512Vtable)
+    return ecSign(sha512Vtable)
 
   # of ES384:
   #   return rsSign(crypto.EVP_sha384())
@@ -114,11 +114,15 @@ proc verifySignature*(data: string, signature: seq[byte], secret: string,
     result = crypto.bearVerifyRSPem(data, secret, signature, addr sha384Vtable, HASH_OID_SHA384, sha384SIZE)
   of RS512:
     result = crypto.bearVerifyRSPem(data, secret, signature, addr sha512Vtable, HASH_OID_SHA512, sha512SIZE)
-  # of ES256:
-  #   result = crypto.bearVerifyECPem(data, secret, signature, addr sha256Vtable, addr ecPrimeI15, sha256SIZE)
+  of ES256:
+    result = crypto.bearVerifyECPem(data, secret, signature, addr sha256Vtable, sha256SIZE)
+  of ES384:
+    result = crypto.bearVerifyECPem(data, secret, signature, addr sha384Vtable, sha384SIZE)
+  of ES512:
+    result = crypto.bearVerifyECPem(data, secret, signature, addr sha512Vtable, sha512SIZE)
 
   else:
-    assert(false, "Not implemented")  
+    assert(false, "Not implemented")
 
 proc sign*(token: var JWT, secret: string) =
   assert token.signature.len == 0
