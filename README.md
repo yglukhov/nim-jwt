@@ -1,4 +1,4 @@
-JWT Implementation for Nim-lang [![Build Status](https://travis-ci.org/yglukhov/nim-jwt.svg?branch=master)](https://travis-ci.org/yglukhov/nim-jwt)
+JWT Implementation for Nim [![Build Status](https://github.com/yglukhov/nim-jwt/workflows/CI/badge.svg?branch=master)](https://github.com/yglukhov/nim-jwt/actions?query=branch%3Amaster)
 ===============================
 
 This is a implementation of JSON Web Tokens for Nim, it allows for the following operations to be performed:
