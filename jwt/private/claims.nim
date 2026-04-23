@@ -1,4 +1,4 @@
-import json, strutils, times, tables
+import json, algorithm, strutils, times, tables
 
 import utils
 
@@ -132,8 +132,19 @@ proc `%`*(c: Claim): JsonNode =
 
 proc `%`*(claims: TableRef[string, Claim]): JsonNode =
     result = newJObject()
-    for k, v in claims:
-        result[k] = %v
+
+    for key in ["iss", "name", "sub", "aud", "nbf", "exp", "iat", "jti"]:
+        if claims.hasKey(key):
+            result[key] = %claims[key]
+
+    var remainingKeys: seq[string] = @[]
+    for key, claim in claims:
+        if claim.kind == GENERAL and key != "name":
+            remainingKeys.add(key)
+    remainingKeys.sort(system.cmp[string])
+
+    for key in remainingKeys:
+        result[key] = %claims[key]
 
 
 proc toBase64*(claims: TableRef[string, Claim]): string =

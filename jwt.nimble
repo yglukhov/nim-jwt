@@ -6,5 +6,4 @@ license       = "MIT"
 
 # Deps
 requires "nim >= 0.19.0"
-requires "bearssl"
-requires "https://github.com/yglukhov/bearssl_pkey_decoder"
+requires "https://github.com/status-im/nim-bearssl >= 0.2.8"
