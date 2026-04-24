@@ -5,7 +5,7 @@ description   = "JSON Web Tokens for Nim"
 license       = "MIT"
 
 # Deps
-requires "nim >= 0.19.0"
+requires "nim >= 1.6"
 requires "bearssl >= 0.2.8"
 requires "bearssl_pkey_decoder#head"
 
