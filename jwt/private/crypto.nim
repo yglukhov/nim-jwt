@@ -1,6 +1,5 @@
 import bearssl
-
-import ./bearssl_pkey_decoder
+import bearssl_pkey_decoder
 
 # This pragma should be the same as in nim-bearssl/decls.nim
 {.pragma: bearSslFunc, cdecl, gcsafe, noSideEffect, raises: [].}
