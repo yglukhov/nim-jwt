@@ -2,6 +2,7 @@ name: CI
 
 on:
   push:
+  pull_request:
   schedule:
     - cron: '0 0 * * *'
 
@@ -12,22 +13,23 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os:             [ubuntu-latest]
-        nim-channel:    [stable, devel]
+        os: [ubuntu-latest]
+        nim-version: ['2.2.8']
 
-    name: ${{ matrix.os }}-${{ matrix.nim-channel }}
+    name: ${{ matrix.os }}-nim-${{ matrix.nim-version }}
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
     - name: Setup nim
       uses: jiro4989/setup-nim-action@v1
       with:
-        nim-version: ${{ matrix.nim-channel }}
+        nim-version: ${{ matrix.nim-version }}
 
     - name: Test
       shell: bash
       run: |
         nim --version
-        nimble install -dy
-        nimble test
+        NIM_BIN="$(command -v nim)"
+        nimble --nim:"${NIM_BIN}" install -dy
+        nimble --nim:"${NIM_BIN}" test
