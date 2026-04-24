@@ -8,4 +8,3 @@ license       = "MIT"
 requires "nim >= 2.0"
 requires "bearssl >= 0.2.8"
 requires "https://github.com/yglukhov/bearssl_pkey_decoder#head"
-
