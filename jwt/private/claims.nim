@@ -141,7 +141,7 @@ proc `%`*(claims: TableRef[string, Claim]): JsonNode =
     for key, claim in claims:
         if claim.kind == GENERAL and key != "name":
             remainingKeys.add(key)
-    remainingKeys.sort(system.cmp[string])
+    remainingKeys.sort()
 
     for key in remainingKeys:
         result[key] = %claims[key]
