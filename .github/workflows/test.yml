@@ -1,27 +1,23 @@
 name: CI
 
-on:
-  push:
-  schedule:
-    - cron: '0 0 * * *'
+on: push
 
 jobs:
   Test:
     if: |
       !contains(github.event.head_commit.message, '[skip ci]')
     strategy:
-      fail-fast: false
       matrix:
         os:             [ubuntu-latest]
-        nim-channel:    [stable, devel]
+        nim-channel:    [stable]
 
     name: ${{ matrix.os }}-${{ matrix.nim-channel }}
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
     - name: Setup nim
-      uses: jiro4989/setup-nim-action@v1
+      uses: jiro4989/setup-nim-action@v2
       with:
         nim-version: ${{ matrix.nim-channel }}
 

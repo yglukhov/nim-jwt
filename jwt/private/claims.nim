@@ -1,4 +1,4 @@
-import json, strutils, times, tables
+import std/[json, algorithm, strutils, times, tables]
 
 import utils
 
@@ -129,12 +129,22 @@ proc toClaims*(j: JsonNode): TableRef[string, Claim] =
 proc `%`*(c: Claim): JsonNode =
     result = c.node
 
-
 proc `%`*(claims: TableRef[string, Claim]): JsonNode =
     result = newJObject()
-    for k, v in claims:
-        result[k] = %v
 
+    for key in ["iss", "name", "sub", "aud", "nbf", "exp", "iat", "jti"]:
+        let c = claims.getOrDefault(key)
+        if c != nil:
+            result[key] = %c
+
+    var remainingKeys: seq[string] = @[]
+    for key, claim in claims:
+        if claim.kind == GENERAL and key != "name":
+            remainingKeys.add(key)
+    remainingKeys.sort(system.cmp[string])
+
+    for key in remainingKeys:
+        result[key] = %claims[key]
 
 proc toBase64*(claims: TableRef[string, Claim]): string =
     let asJson = %claims

@@ -6,17 +6,17 @@ import bearssl, bearssl_pkey_decoder
 proc bearHMAC*(digestVtable: ptr HashClass; key, d: string): seq[byte] =
   var hKey: HmacKeyContext
   var hCtx: HmacContext
-  hmacKeyInit(hKey, digestVtable, key.cstring, key.len.uint)
+  hmacKeyInit(hKey, digestVtable, key.cstring, key.len.csize_t)
   hmacInit(hCtx, hKey, 0)
-  hmacUpdate(hCtx, d.cstring, d.len.uint)
+  hmacUpdate(hCtx, d.cstring, d.len.csize_t)
   let sz = hmacSize(hCtx)
-  result = newSeqUninitialized[byte](sz)
+  result = newSeqUninit[byte](sz)
   discard hmacOut(hCtx, addr result[0])
 
 proc invalidPemKey() =
   raise newException(ValueError, "Invalid PEM encoding")
 
-proc pemDecoderLoop(pem: string, prc: proc(ctx: pointer, pbytes: pointer, nbytes: uint) {.bearSslFunc.}, ctx: pointer) =
+proc pemDecoderLoop(pem: string, prc: proc(ctx: pointer, pbytes: pointer, nbytes: csize_t) {.bearSslFunc.}, ctx: pointer) =
   var pemCtx: PemDecoderContext
   pemDecoderInit(pemCtx)
   var length = len(pem)
@@ -24,7 +24,7 @@ proc pemDecoderLoop(pem: string, prc: proc(ctx: pointer, pbytes: pointer, nbytes
   var inobj = false
   while length > 0:
     var tlen = pemDecoderPush(pemCtx,
-                              unsafeAddr pem[offset], length.uint).int
+                              unsafeAddr pem[offset], length.csize_t).int
     offset = offset + tlen
     length = length - tlen
 
@@ -44,12 +44,12 @@ proc pemDecoderLoop(pem: string, prc: proc(ctx: pointer, pbytes: pointer, nbytes
 
 proc decodeFromPem(skCtx: var SkeyDecoderContext, pem: string) =
   skeyDecoderInit(skCtx)
-  pemDecoderLoop(pem, cast[proc(ctx: pointer, pbytes: pointer, nbytes: uint) {.bearSslFunc.}](skeyDecoderPush), addr skCtx)
+  pemDecoderLoop(pem, cast[proc(ctx: pointer, pbytes: pointer, nbytes: csize_t) {.bearSslFunc.}](skeyDecoderPush), addr skCtx)
   if skeyDecoderLastError(skCtx) != 0: invalidPemKey()
 
 proc decodeFromPem(pkCtx: var PkeyDecoderContext, pem: string) =
   pkeyDecoderInit(addr pkCtx)
-  pemDecoderLoop(pem, cast[proc(ctx: pointer, pbytes: pointer, nbytes: uint) {.bearSslFunc.}](pkeyDecoderPush), addr pkCtx)
+  pemDecoderLoop(pem, cast[proc(ctx: pointer, pbytes: pointer, nbytes: csize_t) {.bearSslFunc.}](pkeyDecoderPush), addr pkCtx)
   if pkeyDecoderLastError(addr pkCtx) != 0: invalidPemKey()
 
 proc calcHash(alg: ptr HashClass, data: string, output: var array[64, byte]) =
@@ -58,7 +58,7 @@ proc calcHash(alg: ptr HashClass, data: string, output: var array[64, byte]) =
   assert(alg.contextSize <= sizeof(ctx).uint)
   alg.init(pCtx)
   if data.len > 0:
-    alg.update(pCtx, unsafeAddr data[0], data.len.uint)
+    alg.update(pCtx, unsafeAddr data[0], data.len.csize_t)
   alg.`out`(pCtx, addr output[0])
 
 proc bearSignRSPem*(data, key: string, alg: ptr HashClass, hashOid: cstring, hashLen: int): seq[byte] =
@@ -75,10 +75,10 @@ proc bearSignRSPem*(data, key: string, alg: ptr HashClass, hashOid: cstring, has
   calcHash(alg, data, digest)
 
   let sigLen = (pk.nBitlen + 7) div 8
-  result = newSeqUninitialized[byte](sigLen)
+  result = newSeqUninit[byte](sigLen)
   let s = rsaPkcs1SignGetDefault()
   assert(not s.isNil)
-  if s(cast[ptr byte](hashOid), addr digest[0], hashLen.uint, addr pk, addr result[0]) != 1:
+  if s(cast[ptr byte](hashOid), addr digest[0], hashLen.csize_t, addr pk, addr result[0]) != 1:
     raise newException(ValueError, "Could not sign")
 
 proc bearVerifyRSPem*(data, key: string, sig: openarray[byte], alg: ptr HashClass, hashOid: cstring, hashLen: int): bool =
@@ -95,7 +95,7 @@ proc bearVerifyRSPem*(data, key: string, sig: openarray[byte], alg: ptr HashClas
   let s = rsaPkcs1VrfyGetDefault()
   var digest2: array[64, byte]
 
-  if s(unsafeAddr sig[0], sig.len.uint, cast[ptr byte](hashOid), hashLen.uint, addr pk, addr digest2[0]) != 1:
+  if s(unsafeAddr sig[0], sig.len.csize_t, cast[ptr byte](hashOid), hashLen.csize_t, addr pk, addr digest2[0]) != 1:
     return false
 
   digest == digest2
@@ -115,7 +115,7 @@ proc bearSignECPem*(data, key: string, alg: ptr HashClass): seq[byte] =
 
   const maxSigLen = 140 # according to bearssl doc
 
-  result = newSeqUninitialized[byte](maxSigLen)
+  result = newSeqUninit[byte](maxSigLen)
   let s = ecdsaSignRawGetDefault()
   assert(not s.isNil)
   let impl = ecGetDefault()
@@ -142,4 +142,4 @@ proc bearVerifyECPem*(data, key: string, sig: openarray[byte], alg: ptr HashClas
 
   let impl = ecGetDefault()
   let s = ecdsaVrfyRawGetDefault()
-  result = s(impl, addr digest[0], hashLen.uint, addr pk, unsafeAddr sig[0], sig.len.uint) == 1
+  result = s(impl, addr digest[0], hashLen.csize_t, addr pk, unsafeAddr sig[0], sig.len.csize_t) == 1
