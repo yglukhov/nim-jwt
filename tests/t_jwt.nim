@@ -1,4 +1,5 @@
 import json, times, unittest
+import std/[assertions, strutils]
 
 import ../jwt
 
@@ -174,3 +175,24 @@ suite "Token tests":
     let signed = $token
     let decoded = signed.toJWT()
     check decoded.header["kid"].getStr() == "something"
+
+block pem_decoder_round_trip:
+  # Exercise both private-key and public-key PEM callbacks with CRLF input.
+  for (algorithm, privateKey, publicKey) in [
+    ("RS256", rsPrivateKey, rsPublicKey),
+    ("ES256", ec256PrivKey, ec256PubKey),
+  ]:
+    var token = tokenWithAlg(algorithm)
+    token.sign(privateKey.replace("\n", "\r\n") & "\r\n")
+    doAssert token.verify(publicKey.replace("\n", "\r\n") & "\r\n", token.header.alg)
+
+block malformed_pem_keys:
+  for algorithm in ["RS256", "ES256"]:
+    var token = tokenWithAlg(algorithm)
+    doAssertRaises ValueError:
+      token.sign("-----BEGIN PRIVATE KEY-----\n!!!!\n-----END PRIVATE KEY-----")
+
+  for token in [signedRSToken("RS256"), signedECToken("ES256", ec256PrivKey)]:
+    doAssertRaises ValueError:
+      discard token.verify(
+        "-----BEGIN PUBLIC KEY-----\n!!!!\n-----END PUBLIC KEY-----", token.header.alg)

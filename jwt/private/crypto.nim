@@ -18,20 +18,19 @@ proc invalidPemKey() =
 
 proc pemDecoderLoop(pem: string, prc: proc(ctx: pointer, pbytes: pointer, nbytes: csize_t) {.bearSslFunc.}, ctx: pointer) =
   var pemCtx: PemDecoderContext
-  pemDecoderInit(pemCtx)
+  pemCtx.init()
   var length = len(pem)
   var offset = 0
   var inobj = false
   while length > 0:
-    var tlen = pemDecoderPush(pemCtx,
-                              unsafeAddr pem[offset], length.csize_t).int
+    let tlen = pemCtx.push(pem.toOpenArray(offset, pem.high))
     offset = offset + tlen
     length = length - tlen
 
-    let event = pemDecoderEvent(pemCtx)
+    let event = pemCtx.lastEvent()
     if event == PEM_BEGIN_OBJ:
       inobj = true
-      pemDecoderSetdest(pemCtx, prc, ctx)
+      pemCtx.setdest(prc, ctx)
     elif event == PEM_END_OBJ:
       if inobj:
         inobj = false
